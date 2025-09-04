@@ -1,0 +1,67 @@
+-- Pokémon Database Example
+
+-- Create table for Pokémon
+CREATE TABLE Pokemon (
+    id INT PRIMARY KEY,
+    name VARCHAR(50),
+    type1 VARCHAR(20),
+    type2 VARCHAR(20),
+    base_hp INT,
+    base_attack INT,
+    base_defense INT
+);
+
+-- Insert sample Pokémon
+INSERT INTO Pokemon (id, name, type1, type2, base_hp, base_attack, base_defense) VALUES
+(1, 'Bulbasaur', 'Grass', 'Poison', 45, 49, 49),
+(4, 'Charmander', 'Fire', NULL, 39, 52, 43),
+(7, 'Squirtle', 'Water', NULL, 44, 48, 65),
+(25, 'Pikachu', 'Electric', NULL, 35, 55, 40),
+(150, 'Mewtwo', 'Psychic', NULL, 106, 110, 90);
+
+-- Create table for Trainers
+CREATE TABLE Trainer (
+    id INT PRIMARY KEY,
+    name VARCHAR(50),
+    hometown VARCHAR(50)
+);
+
+-- Insert sample Trainers
+INSERT INTO Trainer (id, name, hometown) VALUES
+(1, 'Ash', 'Pallet Town'),
+(2, 'Misty', 'Cerulean City'),
+(3, 'Brock', 'Pewter City');
+
+-- Create table for Trainer's Pokémon (many-to-many)
+CREATE TABLE TrainerPokemon (
+    trainer_id INT,
+    pokemon_id INT,
+    PRIMARY KEY (trainer_id, pokemon_id),
+    FOREIGN KEY (trainer_id) REFERENCES Trainer(id),
+    FOREIGN KEY (pokemon_id) REFERENCES Pokemon(id)
+);
+
+-- Assign Pokémon to Trainers
+INSERT INTO TrainerPokemon (trainer_id, pokemon_id) VALUES
+(1, 25), -- Ash has Pikachu
+(1, 1),  -- Ash has Bulbasaur
+(2, 7),  -- Misty has Squirtle
+(3, 4);  -- Brock has Charmander
+
+-- Example Queries
+
+-- 1. Get all Pokémon with base attack greater than 50
+SELECT name, base_attack FROM Pokemon WHERE base_attack > 50;
+
+-- 2. Find all Pokémon owned by Ash
+SELECT p.name
+FROM Pokemon p
+JOIN TrainerPokemon tp ON p.id = tp.pokemon_id
+JOIN Trainer t ON t.id = tp.trainer_id
+WHERE t.name = 'Ash';
+
+-- 3. Count how many Pokémon each Trainer owns
+SELECT t.name, COUNT(tp.pokemon_id) AS num_pokemon
+FROM Trainer t
+LEFT JOIN TrainerPokemon tp ON t.id = tp.trainer_id
+GROUP BY t.name;
